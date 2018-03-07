@@ -6,49 +6,50 @@
 
 /*
  * Constructor for the player; initialize everything here. The side your AI is
- * on (BLACK or WHITE) is passed in as "side". The constructor must finish
+ * on (BLACK or WHITE) is passed in as "side". The constructor must finish 
  * within 30 seconds.
  */
 Player::Player(Side side) {
     // Will be set to true in test_minimax.cpp.
     testingMinimax = false;
-
-    /*
+    
+    /* 
      * TODO: Do any initialization you need to do here (setting up the board,
      * precalculating things, etc.) However, remember that you will only have
      * 30 seconds.
      */
 
-    this->side = side;
+     // Stores the current side
+     this->side = side;
+     // Creates a board (this is what the AI tracks)
+     this->board = new Board();
 
-    this->board = new Board();
-
+     // ----CODE FOR RANDOM AI----
+     // Initialize random seed (this is a test!)
+     // srand(time(NULL));
 }
 
 /*
  * Destructor for the player.
  */
 Player::~Player() {
-
     delete board;
-
 }
 
 /*
  * Compute the next move given the opponent's last move. Your AI is
  * expected to keep track of the board on its own. If this is the first move,
- * or if the opponent passed on the last move, then opponentsMove will be
- * nullptr.
+ * or if the opponent passed on the last move, then opponentsMove will be NULL.
  *
  * msLeft represents the time your AI has left for the total game, in
  * milliseconds. doMove() must take no longer than msLeft, or your AI will
  * be disqualified! An msLeft value of -1 indicates no time limit.
  *
  * The move returned must be legal; if there are no valid moves for your side,
- * return nullptr.
+ * return NULL.
  */
 Move *Player::doMove(Move *opponentsMove, int msLeft) {
-        /* 
+    /* 
      * TODO: Implement how moves your AI should play here. You should first
      * process the opponent's opponents move before calculating your own move
      */
@@ -57,63 +58,46 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     board->doMove(opponentsMove, opponentsSide); 
     std::vector<Move*> moves;
     std::vector<int> scores;
-    // Checks to see if there are legal moves
-    if (board->hasMoves(side)) 
-    {
-        // Go through all possible legal moves
-        for (int i = 0; i < 8; i++)
-        {
-            for (int j = 0; j < 8; j++)
-            {
-                // Check for legality
+    // Checks if legal moves exist
+    if (board->hasMoves(side))  {
+        // Iterate through all possible legal moves
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                // Check if legal
                 Move *currentMove = new Move(i, j);
-                if (board->checkMove(currentMove, side))
-                {
-                    // Calculate this move's score (based on location)
+                if (board->checkMove(currentMove, side)) {
+                    // Calculate move score
                     int score = board->scores[i][j];
-                    // Store them (in a vector?)
+                    // Store scores
                     moves.push_back(currentMove);
                     scores.push_back(score);
-                    // pushing back by same amount, so indices should be same?
                 }
             }
         }
         int max_index = 0;
-        if (testingMinimax)
-        {
-            // Minimax all possible moves, pick move with highest score
+        if (testingMinimax) {
+            // Minimax ossible moves and choose highest score
             int max_score = INT_MIN;
             Board *m_board = board->copy();
-            for(unsigned int i = 0; i < moves.size(); i++)
-            {
+            for(unsigned int i = 0; i < moves.size(); i++) {
                 int curr_score = minimax(moves[i], m_board, 2, true);
-                if (curr_score > max_score)
-                {
+                if (curr_score > max_score) {
                     max_score = curr_score;
                     max_index = i;
                 }
             }
         }
-        else
-        { 
+        else { 
             // Go through the possible scores and find maximum
             int max = scores[0];
-            for (unsigned int i = 0; i < scores.size(); i++)
-            {
-                if (scores[i] > max)
-                {
+            for (unsigned int i = 0; i < scores.size(); i++) {
+                if (scores[i] > max) {
                     max = scores[i];
                     max_index = i;
                 }
             }
         }
         Move *chosenMove = moves[max_index];
-        
-        
-        // ----CODE FOR RANDOM AI---
-        // Pick one at random
-        // int randMove = rand() % possible_moves.size();
-        // Move *chosenMove = possible_moves[randMove];
 
         // Update board with chosen move and return
         board->doMove(chosenMove, side);
@@ -127,30 +111,25 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
  * Implements a minimax algorithm for finding the optimal move to play. 
  * (only used in testminimax)
  */
-int Player::minimax(Move* move, Board* current, int depth, bool maximizingPlayer) {
+int Player::minimax(Move* move, Board* current, int depth, bool maximizingPlayer)
+{
     // Switches sides depending on value of maximizingPlayer
     Side curr_side;
     Side other_side;
     if(maximizingPlayer) {
-
         curr_side = side;
         other_side = (side == BLACK) ? WHITE : BLACK;
-
     }
     else {
         other_side = side;
         curr_side = (side == BLACK) ? WHITE : BLACK;
     }
-
     // Base case: at depth limit or at terminal node
-    if (depth == 0 || !current->hasMoves(curr_side)) {
+    if (depth == 0 || !current->hasMoves(curr_side)){
         return board->count(curr_side) - board->count(other_side);
     }
-
     if (maximizingPlayer) {
-        
         std::vector<Move*> moves;
-        
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 // Check for legality
@@ -161,9 +140,10 @@ int Player::minimax(Move* move, Board* current, int depth, bool maximizingPlayer
                 }
             }
         }
-        // Found all legal possible moves...now minimax them
-        // Since we are playing, we want max score we can get
+        // Minimax all legal and possible moves found
+        // Choose max score
         int min_score = INT_MIN;
+        
         for (unsigned int i = 0; i < moves.size(); i++) {
             Board* new_current = current->copy();
             new_current->doMove(moves[i], curr_side);
@@ -171,15 +151,14 @@ int Player::minimax(Move* move, Board* current, int depth, bool maximizingPlayer
             min_score = max(min_score, score);
             delete new_current;
         }
+
         return min_score;
     }
     else {
-        
         std::vector<Move*> moves;
-        
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                // Check for legality
+                // Check if legal
                 Move *currentMove = new Move(i, j);
                 if (board->checkMove(currentMove, side)) {
                     // Store legal moves
@@ -187,8 +166,8 @@ int Player::minimax(Move* move, Board* current, int depth, bool maximizingPlayer
                 }
             }
         }
-        // Minimaxing all legal moves.
-        // Find min score since we want to minimize our loss
+        // Minimax all legal and possible moves found
+        // Choose min score
         int max_score = INT_MAX;
         for (unsigned int i = 0; i < moves.size(); i++) {
             Board* new_current = current->copy();
@@ -198,5 +177,7 @@ int Player::minimax(Move* move, Board* current, int depth, bool maximizingPlayer
             delete new_current;
         }
         return max_score;
+
     }
+
 }

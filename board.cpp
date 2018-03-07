@@ -11,27 +11,25 @@ Board::Board() {
     black.set(4 + 8 * 3);
     black.set(3 + 8 * 4);
 
-    // Initialize scores matrix
-    for (int i = 0; i < 8; i++){
-        for (int j = 0; j < 8; j++) {
+    // Initialize the scores matrix
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
             scores[i][j] = 1;
-            if (i == 0 || i == 7 || j == 0 || j == 7){
+            if (i == 0 || i == 7 || j == 0 || j == 7)
                 scores[i][j] = 3;
-            }
-            if ((i == 0 || i == 7) && (j == 0 || j == 7)){
+            if ((i == 0 || i == 7) && (j == 0 || j == 7))
                 scores[i][j] = 2;
-            }
-            if ((i == 1 || i == 6) && (j == 1 || j == 6)){
+            if ((i == 1 || i == 6) && (j == 1 || j == 6))
                 scores[i][j] = -3;    
-            }
-            if ((i == 0 || i == 7) && (j == 1 || j == 6)){
+            if ((i == 0 || i == 7) && (j == 1 || j == 6)) 
                 scores[i][j] = -2;
-            }
-            if ((i == 1 || i == 6) && (j == 0 || j == 7)){
+            if ((i == 1 || i == 6) && (j == 0 || j == 7))
                 scores[i][j] = -2;
-            }
         }
     }
+    
 }
 
 /*
@@ -67,9 +65,9 @@ bool Board::onBoard(int x, int y) {
     return(0 <= x && x < 8 && 0 <= y && y < 8);
 }
 
-
+ 
 /*
- * Returns true if the game is finished; false otherwise. The game is finished
+ * Returns true if the game is finished; false otherwise. The game is finished 
  * if neither side has a legal move.
  */
 bool Board::isDone() {
@@ -94,7 +92,7 @@ bool Board::hasMoves(Side side) {
  */
 bool Board::checkMove(Move *m, Side side) {
     // Passing is only legal if you have no moves.
-    if (m == nullptr) return !hasMoves(side);
+    if (m == NULL) return !hasMoves(side);
 
     int X = m->getX();
     int Y = m->getY();
@@ -127,8 +125,8 @@ bool Board::checkMove(Move *m, Side side) {
  * Modifies the board to reflect the specified move.
  */
 void Board::doMove(Move *m, Side side) {
-    // A nullptr move means pass.
-    if (m == nullptr) return;
+    // A NULL move means pass.
+    if (m == NULL) return;
 
     // Ignore if move is invalid.
     if (!checkMove(m, side)) return;

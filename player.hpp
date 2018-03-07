@@ -11,10 +11,10 @@ class Player {
 public:
     Player(Side side);
     ~Player();
-
+    
     Move *doMove(Move *opponentsMove, int msLeft);
-   	int minimax(Move *move, Board *current, int depth, bool player);
-   	
+    int minimax(Move *move, Board *current, int depth, bool player);
+    
     // Flag to tell if the player is running within the test_minimax context
     bool testingMinimax;
     Side side;
