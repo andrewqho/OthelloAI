@@ -11,8 +11,8 @@ Board::Board() {
     black.set(4 + 8 * 3);
     black.set(3 + 8 * 4);
 
-    // Initialize the scores matrix
-    for (int i = 0; i < 8; i++)
+    // For Part 1
+   /* for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
         {
@@ -28,6 +28,51 @@ Board::Board() {
             if ((i == 1 || i == 6) && (j == 0 || j == 7))
                 scores[i][j] = -2;
         }
+    }*/
+
+    // For Part 2
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if ((i == 0 || i == 7) && (j == 0 || j == 7))
+                scores[i][j] = 99;
+            else if ((i == 0 || i == 7) && (j == 1 || j == 6))
+                scores[i][j] = -8;
+            else if ((i == 0 || i == 7) && (j == 2 || j == 5))
+                scores[i][j] = 8;
+            else if ((i == 0 || i == 7) && (j == 3 || j == 4))
+                scores[i][j] = 6;
+
+            if ((i == 1 || i == 6) && (j == 0 || j == 7))
+                scores[i][j] = -8;
+            else if ((i == 1 || i == 6) && (j == 1 || j == 6))
+                scores[i][j] = -24;
+            else if ((i == 1 || i == 6) && (j == 2 || j == 5))
+                scores[i][j] = -4;
+            else if ((i == 1 || i == 6) && (j == 3 || j == 4))
+                scores[i][j] = -3;
+            
+            if ((i == 2 || i == 5) && (j == 0 || j == 7))
+                scores[i][j] = 8;
+            else if ((i == 2 || i == 5) && (j == 1 || j == 6))
+                scores[i][j] = -4;
+            else if ((i == 2 || i == 5) && (j == 2 || j == 5))
+                scores[i][j] = 7;
+            else if ((i == 2 || i == 5) && (j == 3 || j == 4))
+                scores[i][j] = 4;
+
+            if ((i == 3 || i == 4) && (j == 0 || j == 7))
+                scores[i][j] = 6;
+            else if ((i == 3 || i == 4) && (j == 1 || j == 6))
+                scores[i][j] = -3;
+            else if ((i == 3 || i == 4) && (j == 2 || j == 5))
+                scores[i][j] = 4;
+            else if ((i == 3 || i == 4) && (j == 3 || j == 4))
+                scores[i][j] = 0;
+
+        }
+
     }
     
 }

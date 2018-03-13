@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <climits>
 #include <algorithm>
+#include <float.h>
 
 /*
  * Constructor for the player; initialize everything here. The side your AI is
@@ -57,38 +58,62 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     Side opponentsSide = (side == BLACK) ? WHITE : BLACK;
     board->doMove(opponentsMove, opponentsSide); 
     std::vector<Move*> moves;
-    std::vector<int> scores;
-    // Checks if legal moves exist
-    if (board->hasMoves(side))  {
-        // Iterate through all possible legal moves
+    std::vector<double> scores;
+    //std::vector<int> frontier;
+    // Checks existence of legal moves
+    if (board->hasMoves(side)) {
+        // Iterate through all possible moves
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                // Check if legal
+                // Check for legality
                 Move *currentMove = new Move(i, j);
                 if (board->checkMove(currentMove, side)) {
-                    // Calculate move score
+                    // Calculate this move's score based on location
+                    Board *newBoard = board->copy();
+                    newBoard->doMove(currentMove, side);
                     int score = board->scores[i][j];
-                    // Store scores
+                    // Calculate move's frontier score
+                    int front_score = 0;
+                    for (int a = i - 1; a < i + 2; a++) {
+                        for (int b = j - 1; b < j + 2; b++) {
+                            if (board->onBoard(a, b) && a != b) {
+                                if (board->occupied(a, b))
+                                    front_score++;
+                            }
+                        }
+                    }
+                    // Calculate weighted average depending on player side
+                    double new_score;
+                    if (side == WHITE)
+                        new_score = front_score * 0.3 + score * 0.7;
+                    else
+                        new_score = front_score * 0.4 + score * 0.6;
+                    // Stores both the move and the weighted score
                     moves.push_back(currentMove);
-                    scores.push_back(score);
+                    scores.push_back(new_score);
+                    delete newBoard;
                 }
             }
         }
         int max_index = 0;
         if (testingMinimax) {
-            // Minimax ossible moves and choose highest score
-            int max_score = INT_MIN;
-            Board *m_board = board->copy();
+            // Minimax possible moves, 
+            // Pick move with max score
+            double max_score = -DBL_MAX;
             for(unsigned int i = 0; i < moves.size(); i++) {
-                int curr_score = minimax(moves[i], m_board, 2, true);
+                Board *m_board = board->copy();
+                m_board->doMove(moves[i], side);
+                double curr_score = minimax(moves[i], m_board, 2, true);
                 if (curr_score > max_score) {
                     max_score = curr_score;
                     max_index = i;
                 }
+                delete m_board;
             }
         }
         else { 
-            // Go through the possible scores and find maximum
+            // Iterate through the possible scores and 
+            // Find max score
             int max = scores[0];
             for (unsigned int i = 0; i < scores.size(); i++) {
                 if (scores[i] > max) {
@@ -99,11 +124,11 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
         }
         Move *chosenMove = moves[max_index];
 
-        // Update board with chosen move and return
+        // Update board
         board->doMove(chosenMove, side);
         return chosenMove;
     }
-    // No legal moves - passes
+    // If no legal moves, then pass
     return nullptr;
 }
 
@@ -111,39 +136,41 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
  * Implements a minimax algorithm for finding the optimal move to play. 
  * (only used in testminimax)
  */
-int Player::minimax(Move* move, Board* current, int depth, bool maximizingPlayer)
-{
-    // Switches sides depending on value of maximizingPlayer
+int Player::minimax(Move* move, Board* current, int depth, bool maximizingPlayer) {
+    
+    // Side depends on value of maximizingPlayer
     Side curr_side;
     Side other_side;
     if(maximizingPlayer) {
         curr_side = side;
-        other_side = (side == BLACK) ? WHITE : BLACK;
+        other_side = (curr_side == BLACK) ? WHITE : BLACK;
     }
     else {
         other_side = side;
-        curr_side = (side == BLACK) ? WHITE : BLACK;
+        curr_side = (other_side == BLACK) ? WHITE : BLACK;
     }
+    
     // Base case: at depth limit or at terminal node
-    if (depth == 0 || !current->hasMoves(curr_side)){
+    if (depth == 0 || !current->hasMoves(curr_side)) {
         return board->count(curr_side) - board->count(other_side);
     }
+    
     if (maximizingPlayer) {
         std::vector<Move*> moves;
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                // Check for legality
+                // Check if legal
                 Move *currentMove = new Move(i, j);
-                if (board->checkMove(currentMove, side)) {
+                if (board->checkMove(currentMove, curr_side)) {
                     // Store legal moves
                     moves.push_back(currentMove);
                 }
+                delete currentMove;
             }
         }
-        // Minimax all legal and possible moves found
-        // Choose max score
+        // Minimax all possible moves
+        // Take max score
         int min_score = INT_MIN;
-        
         for (unsigned int i = 0; i < moves.size(); i++) {
             Board* new_current = current->copy();
             new_current->doMove(moves[i], curr_side);
@@ -151,23 +178,24 @@ int Player::minimax(Move* move, Board* current, int depth, bool maximizingPlayer
             min_score = max(min_score, score);
             delete new_current;
         }
-
         return min_score;
     }
+    
     else {
         std::vector<Move*> moves;
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                // Check if legal
+                // Check for legality
                 Move *currentMove = new Move(i, j);
-                if (board->checkMove(currentMove, side)) {
+                if (board->checkMove(currentMove, curr_side)) {
                     // Store legal moves
                     moves.push_back(currentMove);
                 }
+                delete currentMove;
             }
         }
-        // Minimax all legal and possible moves found
-        // Choose min score
+        // Minimax all possible moves
+        // Take min score
         int max_score = INT_MAX;
         for (unsigned int i = 0; i < moves.size(); i++) {
             Board* new_current = current->copy();
